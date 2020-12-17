@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<workspace>
+  <project>
+    <path>$WS_DIR$\GPIO.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\..\08&#x4e2D;&#x666F;&#x56eD;&#x7535;&#x5B50;0.96OLED&#x663e;&#x793A;&#x5C4F;_STM8S103K3T6_SPI_&#x4F8B;&#x7A0B;\&#x4e2D;&#x666F;&#x56eD;&#x7535;&#x5B50;0.96OLED&#x663e;&#x793A;&#x5C4F;_STM8S103K3T6_SPI_&#x4F8B;&#x7A0B;\GPIO.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\..\17&#x4e2D;&#x666F;&#x56eD;&#x7535;&#x5B50;0.96OLED&#x663e;&#x793A;&#x5C4F;_STM8&#x7CFB;&#x5217;_IIC_&#x4F8B;&#x7A0B;\&#x4e2D;&#x666F;&#x56eD;&#x7535;&#x5B50;0.96OLED&#x663e;&#x793A;&#x5C4F;_STM8&#x7CFB;&#x5217;_IIC_&#x4F8B;&#x7A0B;\GPIO.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\..\18&#x4e2D;&#x666F;&#x56eD;&#x7535;&#x5B50;0.96OLED&#x663e;&#x793A;&#x5C4F;_STM8&#x7CFB;&#x5217;_SPI_&#x4F8B;&#x7A0B;\&#x4e2D;&#x666F;&#x56eD;&#x7535;&#x5B50;0.96OLED&#x663e;&#x793A;&#x5C4F;_STM8&#x7CFB;&#x5217;_SPI_&#x4F8B;&#x7A0B;\GPIO.ewp</path>
+  </project>
+  <batchBuild/>
+</workspace>
+
+

@@ -1,0 +1,26 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Project:</h2>
+F:\显示屏技术资料\OLED驱动程序\中景园电子1.3竖屏技术资料\中景园电子1.3OLED竖屏_C51系列_IIC_例程\OLED.uvproj
+Project File Date:  05/03/2014
+
+<h2>Output:</h2>
+Rebuild target 'Target 1'
+assembling STARTUP.A51...
+compiling main.c...
+compiling oled.c...
+SRC\oled.c(160): warning C235: parameter 1: different types
+SRC\oled.c(160): warning C235: parameter 2: different types
+SRC\oled.c(228): warning C294: unreachable code
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?OLED_DISPLAY_ON?OLED
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?OLED_DISPLAY_OFF?OLED
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_OLED_SHOWNUM?OLED
+Program Size: data=31.0 xdata=0 code=5013
+creating hex file from "OLED"...
+"OLED" - 0 Error(s), 6 Warning(s).

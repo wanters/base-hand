@@ -1,0 +1,120 @@
+C51 COMPILER V9.52.0.0   MAIN                                                              04/26/2018 10:10:20 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\KEIL_51\C51\BIN\C51.EXE main.c BROWSE INCDIR(.\SRC) DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          //////////////////////////////////////////////////////////////////////////////////   
+   2          //本程序只供学习使用，未经作者许可，不得用于其它任何用途
+   3          //中景园电子
+   4          //店铺地址：http://shop73023976.taobao.com/?spm=2013.1.0.0.M4PqC2
+   5          //
+   6          //  文 件 名   : main.c
+   7          //  版 本 号   : v2.0
+   8          //  作    者   : HuangKai
+   9          //  生成日期   : 2014-0101
+  10          //  最近修改   : 
+  11          //  功能描述   : 1.3寸竖屏IIC接口演示例程(51单片机 IIC接口系列)
+  12          //              说明: 本模块默认使用的是SPI接口；如果需要用IIC接口，请按下面操作
+  13          //              1.SPI位置电阻换到IIC位置
+  14          //              2.DC,CS管脚接地；DC的高底电平是用来设计IIC设备地址的；有兴趣可以研究一下
+  15          //              参考程序中通过io将DC,CS拉低了；可以在初始化函数中看到；用户也可以直接接地。
+  16          //              ----------------------------------------------------------------
+  17          //              ----------------------------------------------------------------
+  18          //              GND    电源地
+  19          //              VCC  接5V或3.3v电源
+  20          //              SCL   P1^0（SCL）
+  21          //              SDA   P1^1（SDA）
+  22          //              RES  接P12
+  23          //              DC   接P13可以直接接地
+  24          //              CS   接P14可以直接接地               
+  25          //              ----------------------------------------------------------------
+  26          // 修改历史   :
+  27          // 日    期   : 
+  28          // 作    者   : HuangKai
+  29          // 修改内容   : 创建文件
+  30          //版权所有，盗版必究。
+  31          //Copyright(C) 中景园电子2014/3/16
+  32          //All rights reserved
+  33          //******************************************************************************/。
+  34          #include "REG51.h"
+  35          #include "oled.h"
+  36          #include "bmp.h"
+  37          
+  38           int main(void)
+  39           {  u8 t;
+  40   1          //delay_init();        //延时函数初始化   
+  41   1        //  NVIC_Configuration();    //设置NVIC中断分组2:2位抢占优先级，2位响应优先级   LED_Init();          //LED端口
+             -初始化
+  42   1          OLED_Init();      //初始化OLED  
+  43   1          OLED_Clear()    ; 
+  44   1          /*
+  45   1           OLED_ShowString(30,0,"OLED TEST");
+  46   1          OLED_ShowString(8,2,"ZHONGJINGYUAN");  
+  47   1          OLED_ShowString(20,4,"2014/05/01");  
+  48   1          OLED_ShowString(0,6,"ASCII:");  
+  49   1          OLED_ShowString(63,6,"CODE:");  
+  50   1          t=' '; 
+  51   1          OLED_ShowCHinese(0,0,0);//中
+  52   1          OLED_ShowCHinese(18,0,1);//景
+  53   1          OLED_ShowCHinese(36,0,2);//园
+  54   1          OLED_ShowCHinese(54,0,3);//电
+C51 COMPILER V9.52.0.0   MAIN                                                              04/26/2018 10:10:20 PAGE 2   
+
+  55   1          OLED_ShowCHinese(72,0,4);//子
+  56   1          OLED_ShowCHinese(90,0,5);//科
+  57   1          OLED_ShowCHinese(108,0,6);//技
+  58   1          */  
+  59   1          t=' ';
+  60   1        while(1) 
+  61   1        {   
+  62   2          OLED_Clear();
+  63   2          OLED_ShowCHinese(6,0,0);//中
+  64   2          OLED_ShowCHinese(22,0,1);//中
+  65   2          OLED_ShowCHinese(40,0,2);//景
+  66   2          
+  67   2          OLED_ShowCHinese(6,2,2);//园
+  68   2          OLED_ShowCHinese(22,2,3);//电
+  69   2          OLED_ShowCHinese(40,2,4);//子
+  70   2          //OLED_ShowCHinese(90,0,5);//科
+  71   2          //OLED_ShowCHinese(108,0,6);//技
+  72   2          OLED_ShowString(0,4,"0.96OLED");
+  73   2          //OLED_ShowString(8,2,"ZHONGJINGYUAN");  
+  74   2         // OLED_ShowString(20,4,"2014/05/01");  
+  75   2          OLED_ShowString(0,6,":64*128:");  
+  76   2          OLED_ShowString(0,8,"ABCDEFGH:");  
+  77   2          OLED_ShowString(0,10,"12345678:");  
+  78   2          OLED_ShowString(0,12,"ABCDEFGH:");  
+  79   2          OLED_ShowString(0,14,"12345678:");  
+  80   2          //OLED_ShowChar(48,6,t);//显示ASCII字符    
+  81   2        //  t++;
+  82   2          //if(t>'~')t=' ';
+  83   2          //OLED_ShowNum(103,6,t,3,16);//显示ASCII字符的码值  
+  84   2            
+  85   2          
+  86   2          delay_ms(1000);
+  87   2          OLED_Clear();
+  88   2          OLED_DrawBMP(0,0,64,16,BMP1); //64*128图片
+  89   2          delay_ms(1000);
+  90   2      
+  91   2        }   
+  92   1        
+  93   1      }
+  94          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    183    ----
+   CONSTANT SIZE    =   1062    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
