@@ -23,6 +23,7 @@
 #include "stm32f4xx_it.h"
 #include "key_switch.h"
 #include "wireless.h"
+#include "oled.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -195,7 +196,8 @@ void SysTick_Handler(void)
   /* USER CODE BEGIN SysTick_IRQn 1 */
   time_1s++;
   beep_time++;
-  alarm_count++;
+  battery_time++;
+  switch_screen_time++;
   set_response_time_plus1();
   set_pd1_time_plus1();
   set_sw_time_plus1(DISTURB_SW1);

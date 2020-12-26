@@ -167,6 +167,7 @@ typedef struct
 	uint8_t report_hand_info_pc;	
 	uint8_t hand_info_flag;
 	uint8_t net_beep;
+	uint8_t disturb_status;
 }CONTROL_STATUS;
 
 typedef struct

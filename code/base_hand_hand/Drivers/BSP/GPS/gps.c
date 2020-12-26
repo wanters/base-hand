@@ -7,6 +7,7 @@
 #include "string.h"
 #include "usart.h"
 #include "lan8720.h"
+#include "oled.h"
 
 DEVICE_INFO_TO_NET base_info_to_net;
 DEVICE_INFO_TO_NET hand_info_to_net;
@@ -350,6 +351,7 @@ void pack_device_info(DEVICE_INFO *device_info)
 
 void gps_process(void)
 {
+	GPS_INFO_T gps_info;
 	gps_recv_check_frame();
 	
 	if(gps_data.gps_flag == 1)
@@ -367,6 +369,11 @@ void gps_process(void)
 		gps_data.gps_flag = 0;
 		
 		pack_device_info(NULL);
+		
+		gps_info.lon = minmea_tocoord(&nmea_gga.longitude);
+		gps_info.lat = minmea_tocoord(&nmea_gga.latitude);	
+		gps_info.status = nmea_gga.fix_quality;
+		oled_display_control(SECOND_SCREEN, TYPE_GPS, &gps_info);
 	}
 }
 

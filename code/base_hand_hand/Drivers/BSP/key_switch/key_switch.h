@@ -46,6 +46,8 @@ void set_pd1_time_plus1(void);
 void set_sw_time_plus1(DISTURB_SW disturb_sw);
 void disturb_switch_style(void);
 void force_shutdown(void);
+void beep_off(void);
+void beep_on(void);
 
 #endif
 

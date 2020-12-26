@@ -123,14 +123,43 @@ int main(void)
   wireless_info_t.channel = 20;
   //printf("uart_e22_ove_flag: %d\n", uart_e22_ove_flag);
   //printf("uart_e22_flag: %d\n", uart_e22_flag);
-  #else
+#else
 	printf("start test...\n");
 	while(1)
 	{
 		delay_ms(1000);
 		printf("1234\n");
 	}
-  #endif
+#endif
+#if 0
+	GPS_INFO_T gps_info;
+	uint8_t operation = 1;
+	int16_t target_info = 182;
+	gps_info.status = 1;
+	gps_info.lon = 116.5;
+	gps_info.lat = 39.9;
+	while(1)
+	{
+#if 0
+		oled_display_style_test(0);
+		oled_display_control(0, TYPE_OPERATION, &operation);
+		oled_display_control(0, TYPE_TARGET_INFO, &target_info);
+		target_info = 50;
+		oled_display_control(1, TYPE_GPS, &gps_info);
+		oled_show_battery_status();
+		delay_ms(1000);
+		oled_display_style_test(1);	
+		oled_display_control(1, TYPE_GPS, &gps_info);
+		delay_ms(1000);
+#else
+		oled_display_style_test(0);
+		oled_display_control(0, TYPE_OPERATION, &operation);
+		oled_display_control(0, TYPE_TARGET_INFO, &target_info);
+		oled_display_control(1, TYPE_GPS, &gps_info);
+		oled_show_battery_status();
+#endif
+	}
+#endif
   while (1)
   {
 	#if BASE_PROJECT
@@ -142,10 +171,9 @@ int main(void)
 		{
 		  time_1s = 0;
 		  GetTemperature();			//获取温度
-		  quan_of_elec();			//电量显示
 		}
-
-		//show_tempeture();			//显示温度
+		oled_display_style();
+		oled_show_battery_status();	//电量显示
 		disturb_key_control();		//按键控制
 		pd1_period_out();			//pd1周期输出控制蜂鸣器
 		#if 0	//打开，开5M关15M

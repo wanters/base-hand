@@ -188,11 +188,23 @@ void set_sw_time_plus1(DISTURB_SW disturb_sw)
 	distrub_sw_channel[disturb_sw].disturb_time++;
 }
 
+void beep_off(void)
+{
+	HAL_GPIO_WritePin(PD_Port, PD_Pin, GPIO_PIN_RESET);	
+}
+
+void beep_on(void)
+{
+	HAL_GPIO_WritePin(PD_Port, PD_Pin, GPIO_PIN_SET);
+}
+
 void pd1_period_out(void)
 {
 	uint8_t disturb_status;
+	uint8_t operation_status;
 	
 	disturb_status = disturb_status_check(distrub_sw_channel);
+	control_status.disturb_status = disturb_status;
 	if(disturb_status)
 	{
 		/*
@@ -216,23 +228,26 @@ void pd1_period_out(void)
 		*/
 		if(disturb_status == 2)
 		{
-			oled_show_status(1);
+			//oled_show_operation_status(1);
+			operation_status = 1;
 		}
 		else if(disturb_status == 1)
 		{
 			/*
 				模块开
 			*/
-			oled_show_status(0);
+			//oled_show_operation_status(0);
+			operation_status = 0;
 		}
 		else
 		{
-			oled_show_status(2);
+			//oled_show_operation_status(2);
+			operation_status = 2;
 		}
+		oled_display_control(FIRST_SCREEN, TYPE_OPERATION, &operation_status);
 	}
 	else
 	{
-		beep_on_off = 0;
 		/*
 			收到网络命令，且小于20s，还有命令过来
 		*/	
@@ -253,16 +268,22 @@ void pd1_period_out(void)
 			beep_time = 0;
 			control_status.net_beep = 0;
 			HAL_GPIO_WritePin(PD_Port, PD_Pin, GPIO_PIN_RESET);
-			alarm_release();
+			oled_clear_target_info();
 		}
 		else
 		{
-			HAL_GPIO_WritePin(PD_Port, PD_Pin, GPIO_PIN_RESET);	
+			if(beep_on_off == 1)
+			{
+				beep_on_off = 0;
+				HAL_GPIO_WritePin(PD_Port, PD_Pin, GPIO_PIN_RESET);	
+			}
 		}
 		/*
-			清除状态
+			清除操作状态
 		*/
-		oled_show_status(2);
+		//oled_show_operation_status(2);
+		operation_status = 2;
+		oled_display_control(FIRST_SCREEN, TYPE_OPERATION, &operation_status);
 	}
 }
 

@@ -173,7 +173,6 @@ typedef struct
 }WIRELESS_INFO_T;
 
 extern WIRELESS_INFO_T wireless_info_t;
-extern uint16_t alarm_count;
 
 void set_response_time_plus1(void);
 void work_mode_select(E22_WORK_MODE mode);

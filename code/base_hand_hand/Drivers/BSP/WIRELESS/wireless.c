@@ -9,7 +9,6 @@
 #include "key_switch.h"
 #include "uart_config.h"
 
-uint16_t alarm_count;
 
 uint8_t wireless_send_buffer[100];
 uint8_t wireless_send_length;
@@ -609,7 +608,8 @@ void wireless_response_process(WIRELESS_DATA_T wireless_data)
 				{
 					target_info_notice = (TARGET_INFO_NOTICE *)wireless_data.wireless_buffer; 
 					printf("horizontal_angle: %f\n", target_info_notice->horizontal_angle);
-					oled_show_location((uint16_t)target_info_notice->horizontal_angle);
+					//oled_show_target_info((uint16_t)target_info_notice->horizontal_angle);
+					oled_display_control(FIRST_SCREEN, TYPE_TARGET_INFO, &target_info_notice->horizontal_angle);
 					control_status.net_beep = 1;
 					beep_time = 0;
 				}

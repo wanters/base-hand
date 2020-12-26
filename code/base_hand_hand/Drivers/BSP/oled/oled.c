@@ -32,10 +32,30 @@
 #include "tmp116.h"
 #include "stdio.h"
 #include "string.h"
+#include "communication.h"
+#include "key_switch.h"
 
+#define BATTERY_TIME	1000
+#define SWITCH_SCREEN_TIME	3000
+
+enum
+{
+	ELEC_0,
+	ELEC_25,
+	ELEC_50,
+	ELEC_75,
+	ELEC_100
+};
 
 char buff[50];
 uint8_t twinkle_flag = 0;
+uint32_t battery_low = 0;
+uint32_t battery_time = 0;
+uint8_t cur_which = 0;
+uint8_t battery_low_beep = 0;
+uint32_t switch_screen_time = 0;
+uint32_t switch_screen_flag = 0;
+
 extern MONITOR_IV monitor_iv[];
 
 void WriteCmd(unsigned char Command)//写命令
@@ -103,9 +123,9 @@ void OLED_Fill(unsigned char fill_Data)//全屏填充
 		WriteCmd(0x00);		//low column start address
 		WriteCmd(0x10);		//high column start address
 		for(n=0;n<130;n++)
-			{
-				WriteDat(fill_Data);
-			}
+		{
+			WriteDat(fill_Data);
+		}
 	}
 }
 
@@ -239,16 +259,18 @@ void OLED_DrawBMP(unsigned char x0,unsigned char y0,unsigned char x1,unsigned ch
 		}
 	}
 }
-void oled_show_disturbe_state(void)
+
+/*
+* 干扰模块状态
+*/
+void oled_show_disturb_state(void)
 {
-//	OLED_CLS();
 	if(monitor_iv[A1_V].result_v < 5)
 	{
 		OLED_ShowStr(0,0,(unsigned char*)&"A1:OFF",2);
 	}
 	if(monitor_iv[A1_V].result_v > 20)
 	{
-		//OLED_ShowStr(40,0," ",2);
 		OLED_ShowStr(0,0,(unsigned char*)&"A1: ON",2);
 	}
 	
@@ -280,59 +302,153 @@ void oled_show_disturbe_state(void)
 	}
 }
 
-void quan_of_elec(void)
+int oled_get_battery_status(void)
 {
-//	float full = 100;
-//	float empty = 0; 
 	float elec;
-
-#if 0
-	if((monitor_iv[POWER_V].result_v+0.35f)<=22.2f)
-	{
-//		sprintf(buff,"%3.0f",empty);
-		OLED_ShowStr(90,0,(unsigned char*)&buff,2);
-		return;
-	}
-#endif
-	
+	/*
+	* 100%电量
+	*/
 	if((monitor_iv[POWER_V].result_v+0.35f)>=29.06f)
 	{
-//		sprintf(buff,"%3.0f",full);
-//		OLED_ShowStr(90,0,(unsigned char*)&buff,2);
-		OLED_DrawBMP(90,0,124,3,bmp_elec100);
-		return;
+		return ELEC_100;
 	}
-	if((monitor_iv[POWER_V].result_v+0.35f)<29.06f || (monitor_iv[POWER_V].result_v+0.35f)>22.2f)
+	
+	/*
+	* 0~100%
+	*/
+	if((monitor_iv[POWER_V].result_v+0.35f)<29.06f || \
+	   (monitor_iv[POWER_V].result_v+0.35f)>22.2f)
 	{
-		elec = 100.0f*(monitor_iv[POWER_V].result_v +0.35f- 22.2f) / 7.0f;
-//		sprintf(buff,"%3.0f",elec);
-//		OLED_ShowStr(90,0,(unsigned char*)&buff,2);
-		if(elec>75)
+		elec = 100.0f*(monitor_iv[POWER_V].result_v+0.35f-22.2f)/7.0f;
+		
+		if(elec > 75)
 		{
-			OLED_DrawBMP(90,0,124,3,bmp_elec100);
+			return ELEC_75;
 		}
-		else if(elec>50 && elec<75)
+		else if(elec > 50)
 		{
-			OLED_DrawBMP(90,0,124,3,bmp_elec75);
+			return ELEC_50;
 		}
-		else if(elec>25 && elec < 50)
+		else if(elec > 25)
 		{
-			OLED_DrawBMP(90,0,124,3,bmp_elec50);
+			return ELEC_25;
 		}
-		else if(elec>10 && elec<25)
+		else
 		{
-			OLED_DrawBMP(90,0,124,3,bmp_elec25);
+			return ELEC_0;
 		}
-		else if(elec<10)
+	}
+	else
+	{
+		return ELEC_0;
+	}	
+}
+
+void oled_show_battery_status(void)
+{
+	int elec_percent;
+	
+	if(battery_time >= BATTERY_TIME)
+	{
+		/* 清空计时时间 */
+		battery_time = 0;
+		
+		/* 清空电量状态	*/
+		battery_low = 0;
+		
+		/* 查看电量 */
+		elec_percent = oled_get_battery_status();
+		
+		//elec_percent = ELEC_0;
+		switch(elec_percent)
 		{
-//			OLED_DrawBMP(55,0,89,3,bmp_elec0);
-			twinkle_flag = 1;
+			case ELEC_100:
+				OLED_DrawBMP(90,0,124,3,bmp_elec100);
+			break;
+			case ELEC_75:
+				OLED_DrawBMP(90,0,124,3,bmp_elec75);
+			break;		
+			case ELEC_50:
+				OLED_DrawBMP(90,0,124,3,bmp_elec50);
+			break;
+			case ELEC_25:
+				OLED_DrawBMP(90,0,124,3,bmp_elec25);
+			break;			
+			default:
+				battery_low = 1;
+			break;		
 		}
-		return;
+		
+		/*
+		* 当电量低于25%时，置位beep标志
+		*/
+		if(elec_percent == ELEC_0)
+		{
+			if(battery_low_beep == 0)
+			{
+				battery_low_beep = 1;
+			}
+		}
+		else
+		{
+			/*
+			* 确认已经响完一声后，再清除beep标志
+			*/
+			if(battery_low_beep == 3)
+			{
+				battery_low_beep = 0;
+			}
+		}
+		
+		/*
+		* 蜂鸣器鸣叫
+		*/
+		if(battery_low_beep == 1)
+		{
+			beep_on();
+			battery_low_beep = 2;
+		}
+		else if(battery_low_beep == 2)
+		{
+			beep_off();
+			battery_low_beep = 3;
+		}
+
+		if(battery_low != 0)
+		{
+			if(twinkle_flag == 0)
+			{
+				oled_twinkle_battery(0);
+				twinkle_flag = 1;
+			}
+			else
+			{
+				twinkle_flag = 0;
+				oled_twinkle_battery(1);
+			}
+		}
 	}
 }
 
-void oled_show_location(uint16_t azimuth)
+/*
+* 电池闪烁
+*/
+void oled_twinkle_battery(uint8_t status)
+{
+	if(status == 0)
+	{
+		OLED_DrawBMP(90,0,124,3,bmp_elec0);
+	}
+	if(status == 1)
+	{
+		OLED_DrawBMP(90,0,124,3,bmp_elec_empty);
+	}
+}
+
+/*
+* 显示目标信息
+*/
+void oled_show_target_info(int16_t azimuth)
 {
 	if((azimuth<=360) && (azimuth>=0))
 	{
@@ -377,14 +493,36 @@ void oled_show_location(uint16_t azimuth)
 			OLED_ShowCN(57,3,3);
 		}
 		
-		sprintf(buff,"%3d",azimuth);
+		sprintf(buff, "%3d", azimuth);
 		OLED_ShowCN(83,3,4);
 		OLED_ShowCN(100,3,4);
 		OLED_ShowStr(83, 3, (unsigned char*)&buff, 2);
 	}
+	else
+	{
+		oled_clear_target_info();
+	}
 }
 
-void oled_show_status(uint8_t status)
+/*
+* 清空目标信息
+*/
+void oled_clear_target_info(void)
+{
+	OLED_ShowCN(40, 3, 4);
+	OLED_ShowCN(57, 3, 4);
+	OLED_ShowCN(74, 3, 4);
+	OLED_ShowCN(91, 3, 4);
+	OLED_ShowCN(0,  0, 4);
+	OLED_ShowCN(15, 0, 4);
+	OLED_ShowCN(30, 0, 4);
+	OLED_ShowCN(42, 0, 4);
+}
+
+/*
+* 显示操作状态
+*/
+void oled_show_operation_status(uint8_t status)
 {
 	if(status == 0)
 	{
@@ -412,41 +550,208 @@ void oled_show_status(uint8_t status)
 	}
 }
 
-void show_tempeture(void)
+/*
+* 显示温度
+*/
+void oled_show_tempeture(void)
 {
-	sprintf(buff,":%3.2f",gettmp116());
-	OLED_ShowStr(35,6,(unsigned char*)&buff,2);
-	OLED_ShowCN(0,6,5);OLED_ShowCN(17,6,6);
-}
-void show_distence(unsigned char * distence)
-{
-	OLED_ShowCN(42,0,7);OLED_ShowStr(2,0,distence,2);
-}
-
-void alarm_release(void)
-{
-	OLED_ShowCN(40,3,4);
-	OLED_ShowCN(57,3,4);
-	OLED_ShowCN(74,3,4);
-	OLED_ShowCN(91,3,4);
-	OLED_ShowCN(0,0,4);
-	OLED_ShowCN(15,0,4);
-	OLED_ShowCN(30,0,4);
-	OLED_ShowCN(42,0,4);
+	//sprintf(buff, ":%3.2f", gettmp116());
+	sprintf(buff, ":%3.2f", -35.678);
+	OLED_ShowStr(35, 0, (unsigned char*)&buff,2);
+	OLED_ShowCN(0,   0, 5);
+	OLED_ShowCN(17,  0, 6);
 }
 
-void elec_twinkle(uint8_t s)
+/*
+* 显示距离
+*/
+void oled_show_distance(unsigned char * distence)
 {
-	if(s == 1)
+	OLED_ShowCN(42,0,7);
+	OLED_ShowStr(2,0,distence,2);
+}
+
+void oled_show_gps_info(GPS_INFO_T *gps_info)
+{
+	if(gps_info == NULL)
 	{
-		OLED_DrawBMP(90,0,124,3,bmp_elec0);
+		/*
+		* 清空gps相关内容
+		*/
+		OLED_ShowCN(0,   0, 4);
+		OLED_ShowCN(17,  0, 4);
+		sprintf(buff, "%s", "          ");
+		OLED_ShowStr(0, 2, (unsigned char*)&buff, 2);
+		sprintf(buff, "%s", "          ");
+		OLED_ShowStr(0, 4, (unsigned char*)&buff, 2);
+		
+		return;
 	}
-	if(s == 2)
+	
+	/*
+	* 位置
+	*/
+	OLED_ShowCN(0,   0, 14);
+	OLED_ShowCN(17,  0, 15);
+	
+	/*
+	* 定位成功
+	*/
+	if(gps_info->status)
 	{
-		OLED_DrawBMP(90,0,124,3,bmp_elec_empty);
+		/* 显示经纬度 */
+		sprintf(buff, "%3.6f", gps_info->lon);
+		OLED_ShowStr(0, 2, (unsigned char*)&buff, 2);
+		sprintf(buff, "%3.6f", gps_info->lat);	
+		OLED_ShowStr(0, 4, (unsigned char*)&buff, 2);		
+	}
+	else
+	{
+		/* 显示未定位成功 */
+		sprintf(buff, "%3.6f", 0.0f);
+		OLED_ShowStr(0, 2, (unsigned char*)&buff, 2);
+		sprintf(buff, "%3.6f", 0.0f);
+		OLED_ShowStr(0, 4, (unsigned char*)&buff,2);
 	}
 }
 
+
+/*
+* 清空指定屏
+*/
+void oled_clear_which(uint8_t which)
+{
+	switch(which)
+	{
+		case FIRST_SCREEN:
+			/* 清空操作状态 */
+			oled_show_operation_status(2);
+			/* 清空目标位置信息 */
+			oled_clear_target_info();
+		break;
+		
+		case SECOND_SCREEN:
+			/* 清空gps信息 */
+			oled_show_gps_info(NULL);
+		break;
+		
+		default:
+			break;
+	}
+}
+
+void oled_set_switch_which(uint8_t which)
+{
+	if(cur_which != which)
+	{
+		oled_clear_which(cur_which);
+		cur_which = which;
+	}
+}
+
+uint8_t oled_get_switch_which(void)
+{
+	return cur_which;
+}
+
+/*
+* @brief	显示控制
+*
+* @param[in]	which	第几屏内容
+* 				=0		第一屏
+*				=1		第二屏
+*
+* @param[in]	type	类别
+*				=0		电量
+*				=1		目标位置信息
+*				=2		干扰模块状态
+*				=3		驱离/迫降状态
+*				=4		距离
+*				=5		温度
+*				=6		gps
+*
+* @param[in]	op		操作
+*				=NULL	不操作
+*				=
+*
+* @return		无
+*/
+void oled_display_control(uint8_t which, uint8_t type, void *op)
+{
+	int16_t azimuth;
+	uint8_t operation_status;
+	GPS_INFO_T *gps_info;
+	
+	/*
+	* 非当前显示，退出
+	*/
+	if(which != oled_get_switch_which())
+	{
+		return;
+	}
+	
+	/*
+	* 显示相应内容
+	*/
+	switch(type)
+	{
+		case TYPE_TARGET_INFO:
+			azimuth = *((int16_t*)op);
+			oled_show_target_info(azimuth);
+		break;
+		
+		case TYPE_OPERATION:
+			operation_status = *((uint8_t*)op);
+			oled_show_operation_status(operation_status);
+		break;
+		
+		case TYPE_GPS:
+			gps_info = (GPS_INFO_T*)op;
+			oled_show_gps_info(gps_info);
+		break;
+		
+		default:
+			
+		break;
+	}
+}
+
+void oled_display_style(void)
+{
+	/*
+	* 有网络命令或者干扰模块打开
+	*/
+	if((switch_screen_flag==1) && (control_status.net_beep	\
+								  ||control_status.disturb_status))
+	{
+		oled_set_switch_which(FIRST_SCREEN);
+	}
+	else
+	{
+		switch_screen_flag = 0;
+		oled_set_switch_which(SECOND_SCREEN);
+	}
+	
+	if(switch_screen_time >= SWITCH_SCREEN_TIME)
+	{
+		switch_screen_time = 0;
+		if(switch_screen_flag == 0)
+		{
+			switch_screen_flag = 1;		
+		}
+		else
+		{
+			switch_screen_flag = 0;
+		}
+	}
+}	
+
+void oled_display_style_test(uint8_t screen)
+{
+	control_status.net_beep = 1;
+	
+	oled_display_style();
+}
 
 
 
